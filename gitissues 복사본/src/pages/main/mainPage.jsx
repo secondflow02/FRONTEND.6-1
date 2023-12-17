@@ -1,37 +1,57 @@
-import { GitApiIssues } from 'apis/gitApi';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { fetchGitApi } from 'store/issuesSlice';
 import styled from 'styled-components';
 
 const MainPage = () => {
-    const [issuesData, setIssuesData] = useState([]);
-    // const [isLoading, setIsLoading] = useState(false);
-    const page = 1;
-    const perPage = 10;
-    const sort = 'created';
-    const state = 'open';
-
+    const dispatch = useDispatch();
+    // state
+    const {
+        issueList: issuesData,
+        isLoading,
+        error,
+    } = useSelector(state => state.issues);
     const navigate = useNavigate();
 
-    const fetchGitApiIssues = async () => {
-        try {
-            // setIsLoading(false);
-            const response = await GitApiIssues(page, perPage, sort, state);
-            setIssuesData(response.data);
-        } catch (error) {
-            console.log('error', error);
-            // setIsLoading(false);
-        }
-    };
+    // const [issuesData, setIssuesData] = useState([]);
+    // const page = 1;
+    // const perPage = 10;
+    // const sort = 'created';
+    // const state = 'open';
 
-    /* if (isLoading) {
-        return <div>Loading...</div>;
-    } */
     useEffect(() => {
-        fetchGitApiIssues();
-        console.log(issuesData);
-    }, [page, perPage, sort, state]);
+        dispatch(
+            fetchGitApi({
+                page: 1,
+                perPage: 10,
+                sort: 'created',
+                state: 'open',
+            }),
+        );
+    }, [dispatch]);
+
+    if (isLoading) {
+        return <div>2조 조장 바보</div>;
+    }
+
+    if (error) {
+        return <div>error</div>;
+    }
+
+    // const fetchGitApiIssues = async () => {
+    //     try {
+    //         const response = await GitApiIssues(page, perPage, sort, state);
+    //         setIssuesData(response.data);
+    //     } catch (error) {
+    //         console.log('error', error);
+    //     }
+    // };
+    // useEffect(() => {
+    //     fetchGitApiIssues();
+    //     console.log(issuesData);
+    // }, [page, perPage, sort, state]);
 
     const handleIssuesDetail = issueNumber => {
         const query = `?issueNumber=${issueNumber}`;
