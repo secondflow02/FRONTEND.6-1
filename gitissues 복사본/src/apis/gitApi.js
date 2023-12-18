@@ -12,8 +12,8 @@ export const GitApiIssues = async (page, perPage, sort, state) => {
             Authorization: `Bearer ${githubToken}`,
         },
         params: {
-            page: page,
-            perPage: perPage, // 10개, 20개, 50개씩 보기
+            page,
+            per_page: perPage,
             sort: sort, // 생성, 업데이트, 댓글순 정렬
             state: state, // open:문제의 공개 진행중 closed: 문제 종료
         },

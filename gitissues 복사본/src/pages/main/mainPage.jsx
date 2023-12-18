@@ -1,66 +1,78 @@
-import { useEffect } from 'react';
+import Pagination from 'components/pagination';
+import { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchGitApi } from 'store/issuesSlice';
 import styled from 'styled-components';
 
 const MainPage = () => {
     const dispatch = useDispatch();
+    const [params, setParams] = useSearchParams();
+    const [currentPage, setCurrentPage] = useState(params.get('page'));
+    const [perPage, setPerPage] = useState(10);
+
+    const navigate = useNavigate();
+
+    //https://github.com/angular/angular-cli/issues?page=2&q=is%3Aissue+is%3Aopen
     // state
     const {
         issueList: issuesData,
         isLoading,
         error,
     } = useSelector(state => state.issues);
-    const navigate = useNavigate();
 
-    // const [issuesData, setIssuesData] = useState([]);
-    // const page = 1;
-    // const perPage = 10;
-    // const sort = 'created';
-    // const state = 'open';
+    {
+        /*
+        page: number 가 바뀌면 데이터가 달라짐
+        perPage: number가 바뀌면 데이터 갯수가 달라져야함
+
+    */
+    }
 
     useEffect(() => {
         dispatch(
             fetchGitApi({
-                page: 1,
-                perPage: 10,
+                page: currentPage,
+                perPage: perPage,
                 sort: 'created',
                 state: 'open',
             }),
         );
-    }, [dispatch]);
+    }, [dispatch, currentPage, perPage]);
 
     if (isLoading) {
-        return <div>2조 조장 바보</div>;
+        return <div>2조 이영록 바보</div>;
     }
 
     if (error) {
         return <div>error</div>;
     }
 
-    // const fetchGitApiIssues = async () => {
-    //     try {
-    //         const response = await GitApiIssues(page, perPage, sort, state);
-    //         setIssuesData(response.data);
-    //     } catch (error) {
-    //         console.log('error', error);
-    //     }
-    // };
-    // useEffect(() => {
-    //     fetchGitApiIssues();
-    //     console.log(issuesData);
-    // }, [page, perPage, sort, state]);
+    const onChangePage = page => {
+        setCurrentPage(page);
+        setParams({ page: page });
+    };
 
     const handleIssuesDetail = issueNumber => {
         const query = `?issueNumber=${issueNumber}`;
         navigate(`/issues/${issueNumber}${query}`);
     };
 
+    const handlePerPage = e => {
+        const selectedPerPage = parseInt(e.target.value, 10);
+        setPerPage(selectedPerPage);
+        setParams({ ...params, page: 1 });
+    };
+
     return (
         <>
             <Style.Wrapper>
+                <Style.Select value={perPage} onChange={handlePerPage}>
+                    <Style.Option value={10}>10</Style.Option>
+                    <Style.Option value={20}>20</Style.Option>
+                    <Style.Option value={50}>50</Style.Option>
+                </Style.Select>
                 {issuesData.map(issue => (
                     <Style.Container
                         key={issue.id}
@@ -78,6 +90,12 @@ const MainPage = () => {
                         <p>{issue.created_at}</p>
                     </Style.Container>
                 ))}
+                <Pagination
+                    issuesData={issuesData}
+                    perPage={perPage}
+                    currentPage={currentPage}
+                    onPageChange={onChangePage}
+                />
             </Style.Wrapper>
         </>
     );
@@ -114,6 +132,14 @@ const TextContainer = styled.div`
     white-space: nowrap;
     text-overflow: ellipsis;
 `;
+const Select = styled.select`
+    width: 5%;
+    padding: 10px auto;
+    text-align: center;
+    margin: 0 80px 10px auto;
+    cursor: pointer;
+`;
+const Option = styled.option``;
 const Style = {
     Wrapper,
     Container,
@@ -121,4 +147,6 @@ const Style = {
     P,
     B,
     TextContainer,
+    Select,
+    Option,
 };
